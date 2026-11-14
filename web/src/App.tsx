@@ -1,3 +1,4 @@
+import MapView from "./MapView";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar, BarChart, CartesianGrid, Legend, Line, LineChart,
@@ -243,7 +244,7 @@ function Dashboard({ data }: { data: Data }) {
         <div className="mx-auto max-w-7xl px-4 py-5">
           <h1 className="text-2xl font-semibold">FireHarmony</h1>
           <p className="mt-1 text-sm text-slate-300">
-            A consistent burning-activity calendar for Punjab and Haryana from MODIS and VIIRS active-fire hotspots,{" "}
+            A consistent burning-activity calendar for the Punjab–Haryana stubble-burning region (a rectangular box, 73.8–77.6°E, 27.6–32.6°N) from MODIS and VIIRS active-fire hotspots,{" "}
             {meta.start_year}–{meta.end_year}
           </p>
           {meta.start_year >= 2012 && (
@@ -310,8 +311,8 @@ function Dashboard({ data }: { data: Data }) {
             </p>
             <div className="mb-2 flex flex-wrap gap-2">
               <button className={`${btn} border-slate-300`} onClick={() => preset(box[1], box[3], box[0], box[2])}>Whole region</button>
-              <button className={`${btn} border-slate-300`} onClick={() => preset(29.5, 32.5, 73.8, 77.0)}>Punjab (approx.)</button>
-              <button className={`${btn} border-slate-300`} onClick={() => preset(27.6, 30.9, 74.4, 77.6)}>Haryana (approx.)</button>
+              <button className={`${btn} border-slate-300`} onClick={() => preset(29.5, 32.5, 73.8, 77.0)}>Punjab area (box)</button>
+              <button className={`${btn} border-slate-300`} onClick={() => preset(27.6, 30.9, 74.4, 77.6)}>Haryana area (box)</button>
             </div>
             <svg
               width={nlon * CELL}
@@ -363,6 +364,7 @@ function Dashboard({ data }: { data: Data }) {
         </section>
 
         <section className="space-y-6">
+          <MapView nlat={nlat} nlon={nlon} step={step} box={box} cellTotals={cellTotals} cellMax={cellMax} aoi={aoi} onAoi={setAoi} label={SERIES_LABEL[series]} />
           <div className={card}>
             <h2 className="font-semibold">Burning activity calendar: {SERIES_LABEL[series]}</h2>
             <p className="mb-3 text-xs text-slate-600">
@@ -469,7 +471,7 @@ function Dashboard({ data }: { data: Data }) {
               <p><b>Data.</b> NASA FIRMS active-fire hotspots: MODIS Collection 6.1 (Aqua) and VIIRS S-NPP. Filters: {meta.filters}. Counts are summed on a 0.25° grid by local calendar month (IST).</p>
               <p><b>Method.</b> {meta.method}. Where S-NPP exists it is used as observed. Before that, Aqua counts are multiplied by a per-calendar-month S-NPP/Aqua ratio fitted in the orbit-stable years.</p>
               <p><b>Validation.</b> Ratios fitted on 2012–2017 predicted monthly S-NPP counts for 2018–2022 with a median absolute error of {monthlyErr.toFixed(0)}%; annual totals were off by {Math.min(...annErr).toFixed(0)}% to {Math.max(...annErr).toFixed(0)}% (over-predicting, as the Aqua delay had begun to grow).</p>
-              <p><b>Limitations.</b> Count ratios are calibrated for this region only. An Oct–Nov delay-based correction predicted 2024–2025 ratios within about 6% as a season, but outside that season no delay effect could be detected, so we do not apply one. Orbit drift and a later daily timing of burning overlap in time and are not separated. Counts are hotspots, not burned area. Do not use this tool alone for operational decisions.</p>
+              <p><b>Limitations.</b> Count ratios are calibrated for this region only. Areas are rectangular boxes on a 0.25° grid, not state boundaries: the study box also covers parts of Pakistan, Himachal Pradesh, Rajasthan, Delhi and Uttar Pradesh. An Oct–Nov delay-based correction predicted 2024–2025 ratios within about 6% as a season, but outside that season no delay effect could be detected, so we do not apply one. Orbit drift and a later daily timing of burning overlap in time and are not separated. Counts are hotspots, not burned area. Do not use this tool alone for operational decisions.</p>
               <p><b>Sources.</b> NASA FIRMS (LANCE/EOSDIS); analysis code and findings log in the project repository.</p>
             </div>
           </details>
