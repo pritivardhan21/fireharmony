@@ -1,3 +1,4 @@
+import TimingEvidence from "./TimingEvidence";
 import MapView from "./MapView";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -465,6 +466,7 @@ function Dashboard({ data }: { data: Data }) {
             </p>
           </div>
 
+          <TimingEvidence />
           <details className={card}>
             <summary className="cursor-pointer font-semibold">Methods, validation and limitations</summary>
             <div className="mt-2 space-y-2 text-sm text-slate-700">
