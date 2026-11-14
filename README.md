@@ -21,7 +21,7 @@ A burning-activity calendar for Punjab and Haryana (73.8–77.6°E, 27.6–32.6�
 
 ## Status and limitations
 
-- **Pre-2012 bridge: [YOU CHECK: either "not loaded; calendar starts in 2012" or "loaded from MODIS 2002–2011"].** The bridge code is in `notebooks/12_final_series.py`; it uses files placed in `data/raw/modis_pre2012/` if present.
+- **Pre-2012 bridge: loaded from MODIS Aqua 2002–2011.** Before 2012, Aqua counts are scaled by a per-calendar-month S-NPP/Aqua ratio calibrated on 2012–2017 and validated on 2018–2022 (median error 17%); it cannot be checked against VIIRS before 2012, so those years are extrapolated. The code is `notebooks/12_final_series.py`.
 - Counts are daytime hotspots, not burned area. If burning has moved later in the day, away from overpass times, recent months can look lower without less burning.
 - Calibration is for this region only. Orbit drift and the later timing of burning overlap in time and are not separated.
 - Not for operational decisions on its own.

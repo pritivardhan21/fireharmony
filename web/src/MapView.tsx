@@ -25,6 +25,10 @@ const STOPS = ["#440154", "#472d7b", "#3b528b", "#2c728e", "#21908d", "#27ad81",
 // Public vector style, no API key (OpenFreeMap, OpenStreetMap data).
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
+// Smooth view: heatmap strength. If the smooth map looks washed out, raise it (e.g. 0.5);
+// if most of it is saturated yellow, lower it (e.g. 0.2).
+const HEAT_INTENSITY = 0.3;
+
 // Offline fallback: plain background so the data layers always draw.
 const FALLBACK_STYLE: maplibregl.StyleSpecification = {
   version: 8,
@@ -65,6 +69,22 @@ function cellsGeoJson(box: number[], step: number, nlat: number, nlon: number, t
   return { type: "FeatureCollection" as const, features: feats };
 }
 
+function pointsGeoJson(box: number[], step: number, nlat: number, nlon: number, totals: number[], max: number) {
+  const feats = [];
+  for (let i = 0; i < nlat * nlon; i++) {
+    const v = totals[i] ?? 0;
+    if (v <= 0) continue;
+    const r = Math.floor(i / nlon);
+    const c = i % nlon;
+    feats.push({
+      type: "Feature" as const,
+      properties: { w: Math.sqrt(v / Math.max(1, max)) },
+      geometry: { type: "Point" as const, coordinates: [box[0] + (c + 0.5) * step, box[1] + (r + 0.5) * step] },
+    });
+  }
+  return { type: "FeatureCollection" as const, features: feats };
+}
+
 function aoiGeoJson(box: number[], step: number, aoi: Aoi) {
   const x0 = box[0] + aoi.c0 * step;
   const x1 = box[0] + (aoi.c1 + 1) * step;
@@ -80,17 +100,33 @@ function aoiGeoJson(box: number[], step: number, aoi: Aoi) {
   };
 }
 
+function applyMode(map: maplibregl.Map, smooth: boolean) {
+  if (!map.getLayer("heat") || !map.getLayer("cells-fill") || !map.getLayer("cells-line")) return;
+  map.setLayoutProperty("heat", "visibility", smooth ? "visible" : "none");
+  map.setLayoutProperty("cells-line", "visibility", smooth ? "none" : "visible");
+  // keep the cells almost invisible in smooth mode so hover and tooltips still work
+  map.setPaintProperty("cells-fill", "fill-opacity", ["case", [">", ["get", "v"], 0], smooth ? 0.02 : 0.72, 0]);
+}
+
 export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, aoi, onAoi, label }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const readyRef = useRef(false);
   const latest = useRef({ nlat, nlon, step, box, cellTotals, cellMax, aoi, onAoi });
+  const smoothRef = useRef(false);
+  const [smooth, setSmooth] = useState(false);
   const [status, setStatus] = useState("Starting map…");
   const [err, setErr] = useState("");
 
   useEffect(() => {
     latest.current = { nlat, nlon, step, box, cellTotals, cellMax, aoi, onAoi };
   });
+
+  useEffect(() => {
+    smoothRef.current = smooth;
+    const map = mapRef.current;
+    if (map && readyRef.current) applyMode(map, smooth);
+  }, [smooth]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -110,8 +146,28 @@ export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, ao
       try {
         const p = latest.current;
         map.addSource("cells", { type: "geojson", data: cellsGeoJson(p.box, p.step, p.nlat, p.nlon, p.cellTotals, p.cellMax) });
+        map.addSource("points", { type: "geojson", data: pointsGeoJson(p.box, p.step, p.nlat, p.nlon, p.cellTotals, p.cellMax) });
         map.addSource("aoi", { type: "geojson", data: aoiGeoJson(p.box, p.step, p.aoi) });
         const firstSymbol = map.getStyle().layers?.find((l) => l.type === "symbol")?.id;
+        map.addLayer({
+          id: "heat", type: "heatmap", source: "points", layout: { visibility: "none" },
+          paint: {
+            "heatmap-weight": ["get", "w"],
+            "heatmap-intensity": HEAT_INTENSITY,
+            "heatmap-radius": ["interpolate", ["exponential", 2], ["zoom"], 4, 10, 6, 40, 8, 160, 10, 640],
+            "heatmap-opacity": 0.85,
+            "heatmap-color": [
+              "interpolate", ["linear"], ["heatmap-density"],
+              0, "rgba(68,1,84,0)",
+              0.08, "rgba(68,1,84,0.35)",
+              0.2, "#3b528b",
+              0.4, "#21908d",
+              0.6, "#5cc863",
+              0.8, "#aadc32",
+              1, "#fde725",
+            ],
+          },
+        }, firstSymbol);
         map.addLayer({
           id: "cells-fill", type: "fill", source: "cells",
           paint: { "fill-color": ["get", "color"], "fill-opacity": ["case", [">", ["get", "v"], 0], 0.72, 0] },
@@ -125,6 +181,7 @@ export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, ao
           paint: { "line-color": "#ef4444", "line-width": 3 },
         });
         readyRef.current = true;
+        applyMode(map, smoothRef.current);
         const n = p.cellTotals.filter((v) => v > 0).length;
         setStatus(`Map ready: ${n} cells with data drawn.`);
       } catch (e) {
@@ -154,7 +211,7 @@ export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, ao
       const f = e.features?.[0];
       if (!f) return;
       const v = Math.round(Number(f.properties?.v ?? 0));
-      popup.setLngLat(e.lngLat).setHTML(`${v.toLocaleString("en-IN")} hotspots`).addTo(map);
+      popup.setLngLat(e.lngLat).setHTML(`${v.toLocaleString("en-IN")} hotspots in this 0.25° cell`).addTo(map);
       map.getCanvas().style.cursor = "pointer";
     });
     map.on("mouseleave", "cells-fill", () => {
@@ -188,29 +245,51 @@ export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, ao
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
-    const src = map.getSource("cells") as maplibregl.GeoJSONSource | undefined;
-    src?.setData(cellsGeoJson(box, step, nlat, nlon, cellTotals, cellMax));
+    (map.getSource("cells") as maplibregl.GeoJSONSource | undefined)
+      ?.setData(cellsGeoJson(box, step, nlat, nlon, cellTotals, cellMax));
+    (map.getSource("points") as maplibregl.GeoJSONSource | undefined)
+      ?.setData(pointsGeoJson(box, step, nlat, nlon, cellTotals, cellMax));
   }, [box, step, nlat, nlon, cellTotals, cellMax]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
-    const src = map.getSource("aoi") as maplibregl.GeoJSONSource | undefined;
-    src?.setData(aoiGeoJson(box, step, aoi));
+    (map.getSource("aoi") as maplibregl.GeoJSONSource | undefined)?.setData(aoiGeoJson(box, step, aoi));
   }, [box, step, aoi]);
+
+  const btn = "rounded border px-2 py-1 text-sm";
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="font-semibold">Map: {label}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-semibold">Map: {label}</h2>
+        <div className="flex gap-2" role="group" aria-label="Map display">
+          <button
+            onClick={() => setSmooth(false)}
+            aria-pressed={!smooth}
+            className={`${btn} ${!smooth ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white"}`}
+          >
+            Cells (exact)
+          </button>
+          <button
+            onClick={() => setSmooth(true)}
+            aria-pressed={smooth}
+            className={`${btn} ${smooth ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white"}`}
+          >
+            Smooth
+          </button>
+        </div>
+      </div>
       <p className="mb-2 text-xs text-slate-600">
         Hotspots per 0.25° cell in the chosen years. Click a cell to select it, Shift+click to extend the selection;
         the red outline is your area. The calendar below follows it.
+        {smooth && " Smooth view is a visual interpolation of the 0.25° cells, not finer-resolution data."}
       </p>
       <div ref={containerRef} className="h-[28rem] w-full overflow-hidden rounded border border-slate-300" />
       <div className="mt-2 flex items-center gap-2 text-xs">
-        <span>0</span>
+        <span>{smooth ? "low" : "0"}</span>
         <div className="h-3 w-48 rounded" style={{ background: `linear-gradient(to right, ${STOPS.join(",")})` }} />
-        <span>{Math.round(cellMax).toLocaleString("en-IN")} (max cell)</span>
+        <span>{smooth ? "high (relative density)" : `${Math.round(cellMax).toLocaleString("en-IN")} (max cell)`}</span>
       </div>
       <p className="mt-1 text-xs text-slate-500">Map status: {status}</p>
       {err && <p className="mt-1 text-xs text-red-700">Last map message: {err}</p>}
