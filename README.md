@@ -50,6 +50,6 @@ Raw FIRMS downloads (`data/raw/`, `data/interim/`) are not in the repository. Se
 
 ## Team
 
-Pritivardhan Chothe
-Pradnya Taware
-Suyash Mali
+- Pritivardhan Chothe
+- Pradnya Taware
+- Suyash Mali
