@@ -38,3 +38,30 @@ button, select, input { font: inherit; }
 /* Default scale: page looks like 110% browser zoom without the user zooming */
 html { font-size: 115%; }
 .recharts-text { font-size: 13.2px; }
+
+/* Phone scale */
+@media (max-width: 640px) { html { font-size: 100%; } }
+
+
+/* Phone fit */
+@media (max-width: 640px) {
+  .min-w-\[40rem\] { min-width: 0 !important; }
+  .grid.min-w-\[40rem\] {
+    grid-template-columns: 1.9rem repeat(12, minmax(0, 1fr)) !important;
+    font-size: 9px;
+    gap: 1px;
+  }
+  .grid.min-w-\[40rem\] .h-8 { font-size: 0 !important; height: 1.4rem; }
+  .grid.min-w-\[40rem\] .leading-8 { line-height: 1.4rem; }
+  main canvas { max-width: 100%; }
+  table { font-size: 12px; }
+}
+
+
+/* Grid shrink: let grid children shrink below their content width */
+@media (max-width: 1023px) {
+  main.grid { grid-template-columns: minmax(0, 1fr) !important; }
+  main.grid > * { min-width: 0; }
+  main.grid > * > * { min-width: 0; max-width: 100%; }
+  .recharts-responsive-container { min-width: 0 !important; }
+}

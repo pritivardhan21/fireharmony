@@ -19,7 +19,7 @@ export default function ThemeToggle() {
   }, [dark]);
 
   return (
-    <div className="absolute right-4 top-4 flex items-center gap-2 text-xs text-slate-200">
+    <div className="mb-3 flex items-center justify-end gap-2 text-xs text-slate-200 sm:absolute sm:right-4 sm:top-4 sm:mb-0">
       <span aria-hidden="true">Light</span>
       <button
         type="button"

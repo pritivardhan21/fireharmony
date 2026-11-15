@@ -283,7 +283,7 @@ function Dashboard({ data }: { data: Data }) {
       <header className="bg-slate-900 text-white">
         <div className="relative mx-auto max-w-7xl px-4 py-5">
           <ThemeToggle />
-          <p className="mb-1 pr-44 text-xs font-medium uppercase tracking-wide text-amber-300">NASA Space Apps Challenge 2026 · Harmonization of MODIS and VIIRS Hot Spots</p>
+          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-amber-300 sm:pr-44">NASA Space Apps Challenge 2026 · Harmonization of MODIS and VIIRS Hot Spots</p>
           <h1 className="text-2xl font-semibold">FireHarmony</h1>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-300">
             Do two families of satellites tell the same story about crop-residue burning? A monthly fire-hotspot calendar for the Punjab–Haryana region (a rectangular box, 73.8–77.6°E, 27.6–32.6°N),{" "}
