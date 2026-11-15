@@ -1,3 +1,4 @@
+import ThemeToggle from "./ThemeToggle";
 import TimingEvidence from "./TimingEvidence";
 import MapView from "./MapView";
 import { useEffect, useMemo, useState } from "react";
@@ -273,16 +274,18 @@ function Dashboard({ data }: { data: Data }) {
     URL.revokeObjectURL(url);
   };
 
-  const card = "rounded-lg border border-slate-200 bg-white p-4 shadow-sm";
-  const btn = "rounded border px-2 py-1 text-sm";
+  const card = "rounded-xl border border-slate-200 bg-white p-5 shadow-sm";
+  const btn = "rounded-md border px-2.5 py-1 text-sm transition-colors hover:border-slate-500";
   const inputCls = "w-20 rounded border border-slate-300 px-1 py-0.5 text-sm";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="bg-slate-900 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-5">
+        <div className="relative mx-auto max-w-7xl px-4 py-5">
+          <ThemeToggle />
+          <p className="mb-1 pr-44 text-xs font-medium uppercase tracking-wide text-amber-300">NASA Space Apps Challenge 2026 · Harmonization of MODIS and VIIRS Hot Spots</p>
           <h1 className="text-2xl font-semibold">FireHarmony</h1>
-          <p className="mt-1 text-sm text-slate-300">
+          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-300">
             Do two families of satellites tell the same story about crop-residue burning? A monthly fire-hotspot calendar for the Punjab–Haryana region (a rectangular box, 73.8–77.6°E, 27.6–32.6°N),{" "}
             {meta.start_year}–{meta.end_year}
           </p>
@@ -586,6 +589,55 @@ function Dashboard({ data }: { data: Data }) {
           </details>
         </section>
       </main>
+
+      <section className="mx-auto max-w-7xl px-4 pb-8">
+        <div className={card}>
+          <h2 className="font-semibold">Evidence and tests: what worked, what failed</h2>
+          <p className="mb-3 text-xs text-slate-600">
+            Results from the notebooks and documents in this repository (notebooks/ and docs/). Failed tests are listed on purpose: they are why this tool offers no forecast and applies no timing correction outside October\u2013November.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[40rem] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-600">
+                  <th className="py-2 pr-3 font-semibold">Test</th>
+                  <th className="py-2 pr-3 font-semibold">Result</th>
+                  <th className="py-2 font-semibold">Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { test: "Overpass-time model (Oct\u2013Nov)", result: "Fitted the S-NPP/Aqua count ratio against the Aqua\u2013S-NPP pass gap on years up to 2023, then predicted 2024 and 2025: within about 6%. Outside October\u2013November no delay effect could be detected, so none is applied.", outcome: "Works in season only", kind: "warn" },
+                  { test: "Month-by-month delay model", result: "Tested on held-out years: median error about 60%.", outcome: "Failed, dropped", kind: "bad" },
+                  { test: "NOAA-20 vs S-NPP consistency", result: "Same instrument type at the same local pass time: whole-year ratios 0.98\u20131.05 (2018\u20132025), up to 1.15 in some October\u2013November seasons. This sets a noise floor of roughly 15%.", outcome: "Agrees", kind: "ok" },
+                  { test: "NOAA-21 check", result: "Counts match S-NPP, but FRP is 12\u201330% higher. The file is near-real-time data and the difference is unexplained.", outcome: "Provisional, not used", kind: "warn" },
+                  { test: "Fixed Aqua factor", result: "A constant Aqua-to-VIIRS factor overshoots observed S-NPP by up to about 43% by 2024.", outcome: "Fails after the drift", kind: "warn" },
+                  { test: "Pre-2012 bridge", result: "Aqua scaled by per-calendar-month ratios fitted on 2012\u20132017 and tested on 2018\u20132022: median monthly error about 17%, annual totals over-predicted by 8\u201315%. The code exists, but pre-2012 data was never downloaded, so it is not loaded here.", outcome: "Validated, not loaded", kind: "warn" },
+                  { test: "Forecast backtest", result: "Simple forecasts missed October\u2013November by 32\u201341% on average (2018\u20132022) and by 84\u2013414% (2023\u20132025). The 10\u201390% range covered actual values only 30\u201342% of the time.", outcome: "Failed: no forecast offered", kind: "bad" },
+                ].map((r) => (
+                  <tr key={r.test} className="border-b border-slate-200 align-top">
+                    <td className="py-2 pr-3 font-medium">{r.test}</td>
+                    <td className="py-2 pr-3 text-slate-700">{r.result}</td>
+                    <td className="py-2">
+                      <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${r.kind === "ok" ? "bg-emerald-100 text-emerald-800" : r.kind === "warn" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"}`}>
+                        {r.outcome}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl space-y-1 px-4 py-6 text-xs text-slate-600">
+          <p><b>FireHarmony</b> · NASA Space Apps Challenge 2026 · Panaji local event · Team FireHarmony</p>
+          <p>Data: NASA FIRMS active-fire hotspots (MODIS Collection 6.1, VIIRS S-NPP). Basemap: OpenFreeMap, © OpenMapTiles, data from OpenStreetMap contributors. Hotspots are not burned area; do not use this tool alone for operational decisions.</p>
+          <p>Code and method notes: <a className="underline" href="https://github.com/pritivardhan21/fireharmony" target="_blank" rel="noreferrer">github.com/pritivardhan21/fireharmony</a></p>
+        </div>
+      </footer>
     </div>
   );
 }

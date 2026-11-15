@@ -4,3 +4,37 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+/* Dark theme (toggled by adding the "dark" class to <html>) */
+html.dark { color-scheme: dark; }
+html.dark body { background-color: #020617; color: #e2e8f0; }
+html.dark .bg-slate-50 { background-color: #020617; }
+html.dark .bg-white { background-color: #0f172a; }
+html.dark .text-slate-900 { color: #f1f5f9; }
+html.dark .text-slate-800 { color: #e2e8f0; }
+html.dark .text-slate-700 { color: #cbd5e1; }
+html.dark .text-slate-600, html.dark .text-slate-500 { color: #94a3b8; }
+html.dark .border-slate-200 { border-color: #1e293b; }
+html.dark .border-slate-300 { border-color: #334155; }
+html.dark .bg-amber-50 { background-color: #292524; }
+html.dark .border-amber-200 { border-color: #78350f; }
+html.dark .text-amber-800 { color: #fbbf24; }
+html.dark input, html.dark select { background-color: #0f172a; color: #e2e8f0; border-color: #334155; }
+html.dark button.bg-slate-900 { background-color: #2563eb; border-color: #2563eb; color: #ffffff; }
+html.dark .recharts-text { fill: #cbd5e1; }
+html.dark .recharts-cartesian-grid line { stroke: #334155; }
+html.dark .recharts-default-tooltip { background-color: #0f172a !important; border-color: #334155 !important; }
+html.dark .recharts-tooltip-label { color: #e2e8f0 !important; }
+
+
+/* Polish */
+html { scroll-behavior: smooth; }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+button, select, input { font: inherit; }
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+::selection { background: #fde68a; color: #111827; }
+
+
+/* Default scale: page looks like 110% browser zoom without the user zooming */
+html { font-size: 115%; }
+.recharts-text { font-size: 13.2px; }
