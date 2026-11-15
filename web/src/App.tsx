@@ -594,7 +594,7 @@ function Dashboard({ data }: { data: Data }) {
         <div className={card}>
           <h2 className="font-semibold">Evidence and tests: what worked, what failed</h2>
           <p className="mb-3 text-xs text-slate-600">
-            Results from the notebooks and documents in this repository (notebooks/ and docs/). Failed tests are listed on purpose: they are why this tool offers no forecast and applies no timing correction outside October\u2013November.
+            Results from the notebooks and documents in this repository (notebooks/ and docs/). Failed tests are listed on purpose: they are why this tool offers no forecast and applies no timing correction outside October–November.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[40rem] text-left text-sm">
@@ -607,13 +607,13 @@ function Dashboard({ data }: { data: Data }) {
               </thead>
               <tbody>
                 {[
-                  { test: "Overpass-time model (Oct\u2013Nov)", result: "Fitted the S-NPP/Aqua count ratio against the Aqua\u2013S-NPP pass gap on years up to 2023, then predicted 2024 and 2025: within about 6%. Outside October\u2013November no delay effect could be detected, so none is applied.", outcome: "Works in season only", kind: "warn" },
+                  { test: "Overpass-time model (Oct–Nov)", result: "Fitted the S-NPP/Aqua count ratio against the Aqua–S-NPP pass gap on years up to 2023, then predicted 2024 and 2025: within about 6%. Outside October–November no delay effect could be detected, so none is applied.", outcome: "Works in season only", kind: "warn" },
                   { test: "Month-by-month delay model", result: "Tested on held-out years: median error about 60%.", outcome: "Failed, dropped", kind: "bad" },
-                  { test: "NOAA-20 vs S-NPP consistency", result: "Same instrument type at the same local pass time: whole-year ratios 0.98\u20131.05 (2018\u20132025), up to 1.15 in some October\u2013November seasons. This sets a noise floor of roughly 15%.", outcome: "Agrees", kind: "ok" },
-                  { test: "NOAA-21 check", result: "Counts match S-NPP, but FRP is 12\u201330% higher. The file is near-real-time data and the difference is unexplained.", outcome: "Provisional, not used", kind: "warn" },
+                  { test: "NOAA-20 vs S-NPP consistency", result: "Same instrument type at the same local pass time: whole-year ratios 0.98–1.05 (2018–2025), up to 1.15 in some October–November seasons. This sets a noise floor of roughly 15%.", outcome: "Agrees", kind: "ok" },
+                  { test: "NOAA-21 check", result: "Counts match S-NPP, but FRP is 12–30% higher. The file is near-real-time data and the difference is unexplained.", outcome: "Provisional, not used", kind: "warn" },
                   { test: "Fixed Aqua factor", result: "A constant Aqua-to-VIIRS factor overshoots observed S-NPP by up to about 43% by 2024.", outcome: "Fails after the drift", kind: "warn" },
-                  { test: "Pre-2012 bridge", result: "Aqua scaled by per-calendar-month ratios fitted on 2012\u20132017 and tested on 2018\u20132022: median monthly error about 17%, annual totals over-predicted by 8\u201315%. The code exists, but pre-2012 data was never downloaded, so it is not loaded here.", outcome: "Validated, not loaded", kind: "warn" },
-                  { test: "Forecast backtest", result: "Simple forecasts missed October\u2013November by 32\u201341% on average (2018\u20132022) and by 84\u2013414% (2023\u20132025). The 10\u201390% range covered actual values only 30\u201342% of the time.", outcome: "Failed: no forecast offered", kind: "bad" },
+                  { test: "Pre-2012 bridge", result: "Aqua scaled by per-calendar-month ratios fitted on 2012–2017 and tested on 2018–2022: median monthly error about 17%, annual totals over-predicted by 8–15%. The code exists, but pre-2012 data was never downloaded, so it is not loaded here.", outcome: "Validated, not loaded", kind: "warn" },
+                  { test: "Forecast backtest", result: "Simple forecasts missed October–November by 32–41% on average (2018–2022) and by 84–414% (2023–2025). The 10–90% range covered actual values only 30–42% of the time.", outcome: "Failed: no forecast offered", kind: "bad" },
                 ].map((r) => (
                   <tr key={r.test} className="border-b border-slate-200 align-top">
                     <td className="py-2 pr-3 font-medium">{r.test}</td>
@@ -627,6 +627,39 @@ function Dashboard({ data }: { data: Data }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-8">
+        <div className={card}>
+          <h2 className="font-semibold">About this data and how to cite it</h2>
+          <p className="mb-3 text-xs text-slate-600">
+            For scientists, analysts and land managers who compare fire records across sensors and years. This is a research aid, not an operational alert system.
+          </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="mb-2 text-sm font-semibold">Data provenance</h3>
+              <dl className="space-y-1 text-sm">
+                <div><dt className="inline font-medium">Source: </dt><dd className="inline text-slate-700">NASA FIRMS active-fire hotspots (MODIS Collection 6.1 and VIIRS S-NPP 375 m), downloaded from the FIRMS archive.</dd></div>
+                <div><dt className="inline font-medium">Area: </dt><dd className="inline text-slate-700">a rectangular box, 73.8–77.6°E, 27.6–32.6°N, summed on a {meta.step}° grid (not state boundaries).</dd></div>
+                <div><dt className="inline font-medium">Period: </dt><dd className="inline text-slate-700">{meta.start_year}–{meta.end_year}, monthly, by local calendar month (IST). The latest months may be incomplete.</dd></div>
+                <div><dt className="inline font-medium">Filters: </dt><dd className="inline text-slate-700">{meta.filters}.</dd></div>
+                <div><dt className="inline font-medium">Method: </dt><dd className="inline text-slate-700">{meta.method}.</dd></div>
+                <div><dt className="inline font-medium">Unit: </dt><dd className="inline text-slate-700">hotspot counts per month. Not burned area, not fire radiative power.</dd></div>
+              </dl>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-semibold">Reuse and citation</h3>
+              <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                <li>Download the monthly counts for any area with the green button in the Area panel.</li>
+                <li>Every number on this page is produced by the notebooks in the repository (notebooks/12_final_series.py builds the series, notebooks/15_timing_evidence.py builds the timing card).</li>
+                <li>Cite the underlying data using the acknowledgement text on the NASA FIRMS website (see its Acknowledgements and Citation page).</li>
+                <li>
+                  Suggested citation for this tool: Chothe, P. (2026). FireHarmony: a harmonised MODIS and VIIRS fire-hotspot calendar for Punjab and Haryana [Web application]. NASA Space Apps Challenge 2026. github.com/pritivardhan21/fireharmony
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
