@@ -105,10 +105,7 @@ export default function TimingEvidence() {
           afternoon and evening, between the passes. Our data cannot prove that on its own.
         </p>
         <p>
-          <b>Independent evidence.</b> Geostationary satellite studies (Meteosat SEVIRI, GEO-KOMPSAT-2A) report that peak
-          fire activity moved from about 1:30 pm in 2020 to about 5 pm in 2024, and that over 90% of large fires in Punjab
-          in 2024–2025 occurred after 3 pm, against about 3% in 2021 (iFOREST Stubble Burning Status Report 2025; Singh et
-          al. 2025, Current Science; NASA). Official fire counts fell by more than 90% since 2021, while burnt area
+          <b>Independent evidence.</b> Geostationary satellite data (15-minute Meteosat SEVIRI observations) analysed by iFOREST show that farm fires in Punjab and Haryana now peak at around 5 pm, and that over 90% of large fires in Punjab in 2024–2025 occurred after 3 pm, against about 3% in 2021 (iFOREST Stubble Burning Status Report 2025). Official fire counts fell by more than 90% since 2021, while burnt area
           mapped from Sentinel-2 fell far less (Punjab: about 31,400 km² in 2022 to about 20,000 km² in 2025).
         </p>
         <p>

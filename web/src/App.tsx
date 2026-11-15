@@ -179,6 +179,44 @@ function Dashboard({ data }: { data: Data }) {
   // Calendar
   const calMax = Math.max(1, ...shownYears.flatMap((y) => MONTHS.map((_, i) => monthly[mIdx(y, i + 1)] ?? 0)));
 
+  // Unusual months: compare each month with the same calendar month in the baseline years
+  const BASE_FROM = 2012;
+  const BASE_TO = 2022;
+  const quantile = (xs: number[], q: number) => {
+    const sorted = [...xs].sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const lo = Math.floor(pos);
+    const hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  };
+  const thresholds = MONTHS.map((_, i) => {
+    const base: number[] = [];
+    for (let y = BASE_FROM; y <= BASE_TO; y++) {
+      const idx = mIdx(y, i + 1);
+      if (coverage[idx] > 0) base.push(monthly[idx] ?? 0);
+    }
+    if (base.length < 8 || median(base) < 20) return null;
+    return { lo: quantile(base, 0.1), hi: quantile(base, 0.9) };
+  });
+  const flagOf = (cal: number, y: number, v: number): "high" | "low" | null => {
+    const t = thresholds[cal];
+    if (!t || coverage[mIdx(y, cal + 1)] <= 0) return null;
+    if (v > t.hi) return "high";
+    if (v < t.lo) return "low";
+    return null;
+  };
+  const flagText = (f: "high" | "low" | null) =>
+    f === "high"
+      ? ` (above the ${BASE_FROM}-${BASE_TO} 90th percentile)`
+      : f === "low"
+        ? ` (below the ${BASE_FROM}-${BASE_TO} 10th percentile)`
+        : "";
+  const critical = shownYears
+    .flatMap((y) => MONTHS.map((mn, i) => ({ y, mn, v: monthly[mIdx(y, i + 1)] ?? 0, ok: coverage[mIdx(y, i + 1)] > 0 })))
+    .filter((r) => r.ok && r.v > 0)
+    .sort((a, b) => b.v - a.v)
+    .slice(0, 3);
+
   // Latest month versus historical median
   const cmp = useMemo(() => {
     let last = -1;
@@ -382,13 +420,19 @@ function Dashboard({ data }: { data: Data }) {
                     {MONTHS.map((mn, i) => {
                       const v = monthly[mIdx(y, i + 1)] ?? 0;
                       const t = Math.sqrt(v / calMax);
+                      const flag = flagOf(i, y, v);
                       return (
                         <div
                           key={mn}
                           className="flex h-8 items-center justify-center rounded-sm"
-                          style={{ background: ramp(t), color: t < 0.6 ? "#fff" : "#111" }}
-                          title={`${mn} ${y}: ${fmt(v)} hotspots`}
-                          aria-label={`${mn} ${y}: ${fmt(v)} hotspots`}
+                          style={{
+                            background: ramp(t),
+                            color: t < 0.6 ? "#fff" : "#111",
+                            outline: flag === "high" ? "2px solid #dc2626" : flag === "low" ? "2px dashed #ffffff" : undefined,
+                            outlineOffset: -2,
+                          }}
+                          title={`${mn} ${y}: ${fmt(v)} hotspots${flagText(flag)}`}
+                          aria-label={`${mn} ${y}: ${fmt(v)} hotspots${flagText(flag)}`}
                         >
                           {v >= 1 ? fmt(v) : ""}
                         </div>
@@ -402,6 +446,22 @@ function Dashboard({ data }: { data: Data }) {
               <span>0</span>
               <div className="h-3 w-48 rounded" style={{ background: `linear-gradient(to right, ${STOPS.join(",")})` }} />
               <span>{fmt(calMax)} (max)</span>
+            </div>
+            <div className="mt-2 space-y-1 text-xs text-slate-600">
+              <p>
+                <span className="mr-1 inline-block h-3 w-4 align-middle" style={{ outline: "2px solid #dc2626", outlineOffset: -2 }} />
+                above the 90th percentile of the {BASE_FROM}-{BASE_TO} values for that calendar month;
+                <span className="mx-1 inline-block h-3 w-4 align-middle" style={{ outline: "2px dashed #ffffff", outlineOffset: -2, background: "#440154" }} />
+                below the 10th percentile. Flags appear only where the baseline median is at least 20 hotspots.
+              </p>
+              <p>
+                A low flag after 2022 may reflect burning that now happens between satellite passes, not less burning (see the timing-evidence card).
+              </p>
+              {critical.length > 0 && (
+                <p>
+                  <b>Largest months in view:</b> {critical.map((c) => `${c.mn} ${c.y} (${fmt(c.v)})`).join(", ")}.
+                </p>
+              )}
             </div>
           </div>
 
