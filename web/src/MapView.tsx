@@ -105,7 +105,7 @@ function applyMode(map: maplibregl.Map, smooth: boolean) {
   map.setLayoutProperty("heat", "visibility", smooth ? "visible" : "none");
   map.setLayoutProperty("cells-line", "visibility", smooth ? "none" : "visible");
   // keep the cells almost invisible in smooth mode so hover and tooltips still work
-  map.setPaintProperty("cells-fill", "fill-opacity", ["case", [">", ["get", "v"], 0], smooth ? 0.02 : 0.72, 0]);
+  map.setPaintProperty("cells-fill", "fill-opacity", ["case", [">", ["get", "v"], 0], smooth ? 0.02 : 0.55, 0]);
 }
 
 export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, aoi, onAoi, label }: Props) {
@@ -170,11 +170,11 @@ export default function MapView({ nlat, nlon, step, box, cellTotals, cellMax, ao
         }, firstSymbol);
         map.addLayer({
           id: "cells-fill", type: "fill", source: "cells",
-          paint: { "fill-color": ["get", "color"], "fill-opacity": ["case", [">", ["get", "v"], 0], 0.72, 0] },
+          paint: { "fill-color": ["get", "color"], "fill-opacity": ["case", [">", ["get", "v"], 0], 0.55, 0] },
         }, firstSymbol);
         map.addLayer({
           id: "cells-line", type: "line", source: "cells", filter: [">", ["get", "v"], 0],
-          paint: { "line-color": "#ffffff", "line-opacity": 0.3, "line-width": 0.5 },
+          paint: { "line-color": "#ffffff", "line-opacity": 0.1, "line-width": 0.4 },
         }, firstSymbol);
         map.addLayer({
           id: "aoi-line", type: "line", source: "aoi",
