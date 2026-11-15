@@ -404,8 +404,9 @@ function Dashboard({ data }: { data: Data }) {
               <button className={`${btn} border-slate-300`} onClick={() => preset(27.6, 30.9, 74.4, 77.6)}>Haryana area (box)</button>
             </div>
             <svg
-              width={nlon * CELL}
-              height={nlat * CELL}
+              viewBox={`0 0 ${nlon * CELL} ${nlat * CELL}`}
+              width="100%"
+              style={{ maxWidth: nlon * CELL, height: "auto" }}
               role="img"
               aria-label="Selectable grid of the study region; north is up"
               className="select-none rounded border border-slate-300"
