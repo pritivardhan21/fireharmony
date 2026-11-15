@@ -286,59 +286,29 @@ function Dashboard({ data }: { data: Data }) {
           <p className="mb-1 text-xs font-medium uppercase tracking-wide text-amber-300 sm:pr-44">NASA Space Apps Challenge 2026 · Harmonization of MODIS and VIIRS Hot Spots</p>
           <h1 className="text-2xl font-semibold">FireHarmony</h1>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-300">
-            Do two families of satellites tell the same story about crop-residue burning? A monthly fire-hotspot calendar for the Punjab–Haryana region (a rectangular box, 73.8–77.6°E, 27.6–32.6°N),{" "}
-            {meta.start_year}–{meta.end_year}
+            Do two satellite families tell the same story about crop-residue burning? Punjab–Haryana, {meta.start_year}–{meta.end_year}
           </p>
-          {meta.start_year >= 2012 && (
-            <p className="mt-2 inline-block rounded bg-amber-200 px-2 py-1 text-xs text-amber-900">
-              Pre-2012 MODIS bridge not loaded: the calendar starts in {meta.start_year}
-            </p>
-          )}
         </div>
       </header>
-
-      {/* Plain-language summary for first-time viewers */}
-      <section className="border-b border-amber-200 bg-amber-50">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-4 md:grid-cols-3">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-800">1 · The problem</div>
-            <p className="mt-1 text-sm text-slate-800">
-              Two families of satellites (MODIS and VIIRS) count fires from space, but they see different pixel sizes at different times of day. Their counts cannot simply be added or compared.
-            </p>
-          </div>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-800">2 · What this tool does</div>
-            <p className="mt-1 text-sm text-slate-800">
-              Builds one consistent monthly fire record for any area you pick (VIIRS as the reference, 2012–2025) and shows where comparisons between satellites and years break down.
-            </p>
-          </div>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-800">3 · How to use it</div>
-            <p className="mt-1 text-sm text-slate-800">
-              Pick an area on the map, read the calendar under it, then open the card “Why recent months look low” to see the timing effect.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Headline strip: same figures as the timing-evidence card (notebooks/15_timing_evidence.py) */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-4">
           <p className="text-sm font-medium text-slate-800">
-            Satellite daytime detections of October–November fires fell about 90% between 2021 and 2025. The pattern fits burning that moved to times between satellite passes; our data cannot prove that on its own.
+            October–November daytime detections fell about 90% from 2021 to 2025. This is consistent with burning moving to times between satellite passes, which our data cannot prove on its own. Pick an area below to explore.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="text-2xl font-semibold text-slate-900">91,523 → 9,126</div>
-              <div className="text-xs text-slate-600">S-NPP daytime detections, Oct–Nov, study box, 2021 → 2025 (−90%)</div>
+              <div className="text-xs text-slate-600">S-NPP daytime detections, Oct–Nov, 2021 → 2025 (−90%)</div>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="text-2xl font-semibold text-slate-900">13:48 → 15:12</div>
-              <div className="text-xs text-slate-600">Aqua median daytime pass (IST), Oct–Nov, 2021 → 2025; S-NPP stayed near 13:42</div>
+              <div className="text-xs text-slate-600">Aqua median daytime pass (IST); S-NPP stays near 13:42</div>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="text-2xl font-semibold text-slate-900">361 → 490</div>
-              <div className="text-xs text-slate-600">S-NPP night detections, Oct–Nov, 2021 → 2025: too few to absorb the daytime loss</div>
+              <div className="text-xs text-slate-600">S-NPP night detections: too few to absorb the loss</div>
             </div>
           </div>
         </div>
